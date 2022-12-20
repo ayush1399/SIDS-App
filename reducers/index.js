@@ -1,7 +1,9 @@
-import { combineReducers } from 'redux';
+import {combineReducers} from 'redux';
 
 import BLEReducer from './BLEReducer';
+import DataReducer from './DataReducer';
 
 export default combineReducers({
-    BLEs: BLEReducer,
-  });
+  BLEs: BLEReducer,
+  Data: DataReducer,
+});

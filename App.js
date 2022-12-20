@@ -18,9 +18,9 @@ import thunk from 'redux-thunk';
 import {BleManager} from 'react-native-ble-plx';
 
 import BLEList from './BLElist';
-import BLEservices from './BLEservices'
-import BLEservicecharacteristics from './BLEservicecharacteristics'
-import BLECharacteristic from './BLEcharacteristics'
+import BLEservices from './BLEservices';
+import BLEservicecharacteristics from './BLEservicecharacteristics';
+import BLECharacteristic from './BLEcharacteristics';
 import {composeWithDevTools} from 'redux-devtools-extension';
 
 import {
@@ -55,8 +55,6 @@ const store = createStore(
 );
 
 const App: () => React$Node = () => {
-
-
   if (Platform.OS === 'android') {
     // Calling the permission function
     const granted = PermissionsAndroid.request(
@@ -68,7 +66,7 @@ const App: () => React$Node = () => {
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
       // Permission Granted
-      console.log('granted');
+      // console.log('granted');
     }
   }
   return (

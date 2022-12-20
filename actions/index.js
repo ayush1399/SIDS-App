@@ -6,34 +6,44 @@ export const addBLE = device => ({
   device,
 });
 
-export const connectedDevice = (device) => ({
-  type: "CONNECTED_DEVICE",
-  connectedDevice: device
+export const addIR = datum => ({
+  type: 'ADD_IR',
+  datum,
 });
 
-export const connectedServiceCharacteristics = (characteristic) => ({
-  type: "CONNECTED_CHARACTERISTICS",
-  connectedServiceCharacteristics: characteristic
+export const addRD = datum => ({
+  type: 'ADD_RD',
+  datum,
 });
 
-export const connectedDeviceServices = (services) => ({
-  type: "CONNECTED_SERVICES",
-  connectedDeviceServices: services
+export const connectedDevice = device => ({
+  type: 'CONNECTED_DEVICE',
+  connectedDevice: device,
 });
 
-export const selectedService = (serviceID) => ({
-  type: "SELECTED_SERVICE",
-  selectedService: serviceID
+export const connectedServiceCharacteristics = characteristic => ({
+  type: 'CONNECTED_CHARACTERISTICS',
+  connectedServiceCharacteristics: characteristic,
 });
 
-export const selectedCharacteristic = (characteristic) => ({
-  type: "SELECTED_CHARACTERISTIC",
-  selectedCharacteristic: characteristic
+export const connectedDeviceServices = services => ({
+  type: 'CONNECTED_SERVICES',
+  connectedDeviceServices: services,
 });
 
-export const changeStatus = (status) => ({
-  type: "CHANGE_STATUS",
-  status: status
+export const selectedService = serviceID => ({
+  type: 'SELECTED_SERVICE',
+  selectedService: serviceID,
+});
+
+export const selectedCharacteristic = characteristic => ({
+  type: 'SELECTED_CHARACTERISTIC',
+  selectedCharacteristic: characteristic,
+});
+
+export const changeStatus = status => ({
+  type: 'CHANGE_STATUS',
+  status: status,
 });
 
 //some thunks to control the BLE Device
@@ -41,10 +51,10 @@ export const changeStatus = (status) => ({
 export const startScan = () => {
   return (dispatch, getState, DeviceManager) => {
     // you can use Device Manager here
-    console.log("start Scanning");
-    const subscription = DeviceManager.onStateChange((state) => {
+    // console.log('start Scanning');
+    const subscription = DeviceManager.onStateChange(state => {
       if (state === 'PoweredOn') {
-        console.log("powered on");
+        // console.log('powered on');
         dispatch(scan());
         subscription.remove();
       }
@@ -66,10 +76,10 @@ const requestLocationPermission = async () => {
       },
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('Location permission for bluetooth scanning granted');
+      // console.log('Location permission for bluetooth scanning granted');
       return true;
     } else {
-      console.log('Location permission for bluetooth scanning revoked');
+      // console.log('Location permission for bluetooth scanning revoked');
       return false;
     }
   } catch (err) {
@@ -80,12 +90,13 @@ const requestLocationPermission = async () => {
 
 export const scan = () => {
   return async (dispatch, getState, DeviceManager) => {
-    const permission = Platform.OS === 'ios'? true: await requestLocationPermission();
+    const permission =
+      Platform.OS === 'ios' ? true : await requestLocationPermission();
     if (permission) {
       DeviceManager.startDeviceScan(null, null, (error, device) => {
         dispatch(changeStatus('Scanning'));
         if (error) {
-          console.log(error);
+          // console.log(error);
         }
         if (device !== null) {
           dispatch(addBLE(device));
@@ -93,7 +104,7 @@ export const scan = () => {
       });
     } else {
       //TODO: here we could treat any new state or new thing when there's no permission to BLE
-      console.log('Error permission');
+      // console.log('Error permission');
     }
   };
 };
@@ -110,46 +121,48 @@ export const getServiceCharacteristics = service => {
   };
 };
 
-export const connectDevice = (device) => {
+export const connectDevice = device => {
   return (dispatch, getState, DeviceManager) => {
-    dispatch(changeStatus("Connecting"));
-    DeviceManager.stopDeviceScan()
+    dispatch(changeStatus('Connecting'));
+    DeviceManager.stopDeviceScan();
     device
       .connect()
-      .then((device) => {
-        dispatch(changeStatus("Discovering"));
-        let allCharacteristics = device.discoverAllServicesAndCharacteristics()
+      .then(device => {
+        dispatch(changeStatus('Discovering'));
+        let allCharacteristics = device.discoverAllServicesAndCharacteristics();
         dispatch(connectedDevice(device));
         return allCharacteristics;
       })
-      .then((device) => {
+      .then(device => {
         let services = device.services(device.id);
         return services;
       })
-      .then((services) => {
-          console.log("found services: ", services)
+      .then(
+        services => {
+          // console.log('found services: ', services);
           dispatch(connectedDeviceServices(services));
-        }, (error) => {
-          console.log(this._logError("SCAN", error));
-        })
+        },
+        error => {
+          // console.log(this._logError('SCAN', error));
+        },
+      );
+  };
+};
 
-  }
-}
-
-const crcVal = (array) => {
+const crcVal = array => {
   let currentVal;
-  let output = array.reduce(function (currentVal, index) {
+  let output = array.reduce(function(currentVal, index) {
     currentVal = currentVal + index;
     if (currentVal > 256) {
       currentVal = currentVal - 256;
     }
     return currentVal;
-  })
+  });
   return 255 - output;
-}
+};
 
 function str2ab(str) {
-  console.log("string to send: ", str)
+  // console.log('string to send: ', str);
   var bufView = new Uint8Array(str.length);
   for (var i = 0, strLen = str.length; i < strLen; i++) {
     bufView[i] = str.charCodeAt(i);
@@ -157,10 +170,10 @@ function str2ab(str) {
   return bufView;
 }
 
-export const writeCharacteristic = (text) => {
+export const writeCharacteristic = text => {
   return (dispatch, getState, DeviceManager) => {
     const state = getState();
-    let buffer = str2ab(text)
+    let buffer = str2ab(text);
     let packetsize = 20;
     let offset = 0;
     let packetlength = packetsize;
@@ -171,10 +184,14 @@ export const writeCharacteristic = (text) => {
         packetlength = offset + packetsize;
       }
       let packet = buffer.slice(offset, packetlength);
-      console.log("packet: ", packet)
+      // console.log('packet: ', packet);
       let base64packet = Base64.btoa(String.fromCharCode.apply(null, packet));
-      state.BLEs.connectedDevice.writeCharacteristicWithoutResponseForService(state.BLEs.selectedService.uuid, state.BLEs.selectedCharacteristic.uuid, base64packet)
+      state.BLEs.connectedDevice.writeCharacteristicWithoutResponseForService(
+        state.BLEs.selectedService.uuid,
+        state.BLEs.selectedCharacteristic.uuid,
+        base64packet,
+      );
       offset += packetsize;
-    } while (offset < buffer.length)
-  }
-}
+    } while (offset < buffer.length);
+  };
+};

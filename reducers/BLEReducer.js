@@ -13,7 +13,7 @@ const INITIAL_STATE = {
 const BLEReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'ADD_BLE':
-      console.log(action.device.name);
+      // console.log(action.device.name);
       if (
         state.BLEList.some(device => device.id === action.device.id) ||
         action.device.name === null
