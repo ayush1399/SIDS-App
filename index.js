@@ -1,5 +1,8 @@
-/**
- * @format
+/*
+ * Project Members:
+ * Ayushman Singh (as16513),
+ * Dimitrios Kaoutzanis (dk4572),
+ * Rachel Abreu (ra2466)
  */
 
 import {AppRegistry} from 'react-native';
